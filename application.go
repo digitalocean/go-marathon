@@ -922,7 +922,7 @@ func (r *Application) EmptyNetworks() *Application {
 	return r
 }
 
-// Bridged sets the networking mode to bridged
+// BridgedNetwork sets the networking mode to bridged
 func (r *Application) BridgedNetwork(name string) *Application {
 	if r.Networks == nil {
 		r.EmptyNetworks()
@@ -934,7 +934,7 @@ func (r *Application) BridgedNetwork(name string) *Application {
 	return r
 }
 
-// Bridged sets the networking mode to container
+// ContainerNetwork sets the networking mode to container
 func (r *Application) ContainerNetwork(name string) *Application {
 	if r.Networks == nil {
 		r.EmptyNetworks()
@@ -946,7 +946,7 @@ func (r *Application) ContainerNetwork(name string) *Application {
 	return r
 }
 
-// Host sets the networking mode to host
+// HostNetwork sets the networking mode to host
 func (r *Application) HostNetwork(name string) *Application {
 	if r.Networks == nil {
 		r.EmptyNetworks()
