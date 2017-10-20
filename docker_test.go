@@ -85,6 +85,20 @@ func TestPortMappingLabels(t *testing.T) {
 	assert.Equal(t, 0, len(*pm.Labels))
 }
 
+func TestPortMappingNetworkNames(t *testing.T) {
+	pm := createPortMapping(80, "tcp")
+
+	pm.AddNetwork("test")
+
+	assert.Equal(t, 1, len(*pm.NetworkNames))
+	assert.Equal(t, "test", (*pm.NetworkNames)[0])
+
+	pm.EmptyNetworkNames()
+
+	assert.NotNil(t, pm.NetworkNames)
+	assert.Equal(t, 0, len(*pm.NetworkNames))
+}
+
 func TestVolume(t *testing.T) {
 	container := NewDockerApplication().Container
 
