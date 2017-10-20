@@ -23,9 +23,10 @@ import (
 
 // Container is the definition for a container type in marathon
 type Container struct {
-	Type    string    `json:"type,omitempty"`
-	Docker  *Docker   `json:"docker,omitempty"`
-	Volumes *[]Volume `json:"volumes,omitempty"`
+	Type         string         `json:"type,omitempty"`
+	Docker       *Docker        `json:"docker,omitempty"`
+	Volumes      *[]Volume      `json:"volumes,omitempty"`
+	PortMappings *[]PortMapping `json:"portMappings,omitempty"`
 }
 
 // PortMapping is the portmapping structure between container and mesos
@@ -122,12 +123,10 @@ type ExternalVolume struct {
 
 // Docker is the docker definition from a marathon application
 type Docker struct {
-	ForcePullImage *bool          `json:"forcePullImage,omitempty"`
-	Image          string         `json:"image,omitempty"`
-	Network        string         `json:"network,omitempty"`
-	Parameters     *[]Parameters  `json:"parameters,omitempty"`
-	PortMappings   *[]PortMapping `json:"portMappings,omitempty"`
-	Privileged     *bool          `json:"privileged,omitempty"`
+	ForcePullImage *bool         `json:"forcePullImage,omitempty"`
+	Image          string        `json:"image,omitempty"`
+	Parameters     *[]Parameters `json:"parameters,omitempty"`
+	Privileged     *bool         `json:"privileged,omitempty"`
 }
 
 // Volume attachs a volume to the container
@@ -243,63 +242,51 @@ func (docker *Docker) Container(image string) *Docker {
 	return docker
 }
 
-// Bridged sets the networking mode to bridged
-func (docker *Docker) Bridged() *Docker {
-	docker.Network = "BRIDGE"
-	return docker
-}
-
-// Host sets the networking mode to host
-func (docker *Docker) Host() *Docker {
-	docker.Network = "HOST"
-	return docker
-}
-
 // Expose sets the container to expose the following TCP ports
 //		ports:			the TCP ports the container is exposing
-func (docker *Docker) Expose(ports ...int) *Docker {
+func (container *Container) Expose(ports ...int) *Container {
 	for _, port := range ports {
-		docker.ExposePort(PortMapping{
+		container.ExposePort(PortMapping{
 			ContainerPort: port,
 			HostPort:      0,
 			ServicePort:   0,
 			Protocol:      "tcp"})
 	}
-	return docker
+	return container
 }
 
 // ExposeUDP sets the container to expose the following UDP ports
 //		ports:			the UDP ports the container is exposing
-func (docker *Docker) ExposeUDP(ports ...int) *Docker {
+func (container *Container) ExposeUDP(ports ...int) *Container {
 	for _, port := range ports {
-		docker.ExposePort(PortMapping{
+		container.ExposePort(PortMapping{
 			ContainerPort: port,
 			HostPort:      0,
 			ServicePort:   0,
 			Protocol:      "udp"})
 	}
-	return docker
+	return container
 }
 
 // ExposePort exposes an port in the container
-func (docker *Docker) ExposePort(portMapping PortMapping) *Docker {
-	if docker.PortMappings == nil {
-		docker.EmptyPortMappings()
+func (container *Container) ExposePort(portMapping PortMapping) *Container {
+	if container.PortMappings == nil {
+		container.EmptyPortMappings()
 	}
 
-	portMappings := *docker.PortMappings
+	portMappings := *container.PortMappings
 	portMappings = append(portMappings, portMapping)
-	docker.PortMappings = &portMappings
+	container.PortMappings = &portMappings
 
-	return docker
+	return container
 }
 
 // EmptyPortMappings explicitly empties the port mappings -- use this if you need to empty
 // port mappings of an application that already has port mappings set (setting port mappings to nil will
 // keep the current value)
-func (docker *Docker) EmptyPortMappings() *Docker {
-	docker.PortMappings = &[]PortMapping{}
-	return docker
+func (container *Container) EmptyPortMappings() *Container {
+	container.PortMappings = &[]PortMapping{}
+	return container
 }
 
 // AddLabel adds a label to a PortMapping
@@ -351,13 +338,13 @@ func (docker *Docker) EmptyParameters() *Docker {
 
 // ServicePortIndex finds the service port index of the exposed port
 //		port:			the port you are looking for
-func (docker *Docker) ServicePortIndex(port int) (int, error) {
-	if docker.PortMappings == nil || len(*docker.PortMappings) == 0 {
+func (container *Container) ServicePortIndex(port int) (int, error) {
+	if container.PortMappings == nil || len(*container.PortMappings) == 0 {
 		return 0, errors.New("The docker does not contain any port mappings to search")
 	}
 
 	// step: iterate and find the port
-	for index, containerPort := range *docker.PortMappings {
+	for index, containerPort := range *container.PortMappings {
 		if containerPort.ContainerPort == port {
 			return index, nil
 		}

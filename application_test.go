@@ -49,14 +49,14 @@ func TestApplicationString(t *testing.T) {
 		Memory(64).
 		Storage(0.0).
 		Count(2).
+		Bridged().
 		AddArgs("/usr/sbin/apache2ctl", "-D", "FOREGROUND").
 		AddEnv("NAME", "frontend_http").
 		AddEnv("SERVICE_80_NAME", "test_http")
 	app.
-		Container.Docker.Container("quay.io/gambol99/apache-php:latest").
-		Bridged().
-		Expose(80).
-		Expose(443)
+		Container.Expose(80).Expose(443).
+		Docker.Container("quay.io/gambol99/apache-php:latest")
+
 	app, err := app.CheckHTTP("/health", 80, 5)
 	assert.Nil(t, err)
 
@@ -292,7 +292,7 @@ func TestApplicationPortDefinitions(t *testing.T) {
 func TestHasHealthChecks(t *testing.T) {
 	app := NewDockerApplication()
 	assert.False(t, app.HasHealthChecks())
-	app.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80)
+	app.Container.Expose(80).Docker.Container("quay.io/gambol99/apache-php:latest")
 	_, err := app.CheckTCP(80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())
@@ -304,7 +304,7 @@ func TestApplicationCheckTCP(t *testing.T) {
 	_, err := app.CheckTCP(80, 10)
 	assert.Error(t, err)
 	assert.False(t, app.HasHealthChecks())
-	app.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80)
+	app.Container.Expose(80).Docker.Container("quay.io/gambol99/apache-php:latest")
 	_, err = app.CheckTCP(80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())
@@ -320,7 +320,7 @@ func TestApplicationCheckHTTP(t *testing.T) {
 	_, err := app.CheckHTTP("/", 80, 10)
 	assert.Error(t, err)
 	assert.False(t, app.HasHealthChecks())
-	app.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80)
+	app.Container.Expose(80).Docker.Container("quay.io/gambol99/apache-php:latest")
 	_, err = app.CheckHTTP("/health", 80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())

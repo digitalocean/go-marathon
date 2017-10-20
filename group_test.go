@@ -17,6 +17,7 @@ limitations under the License.
 package marathon
 
 import (
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,8 +59,11 @@ func TestGroup(t *testing.T) {
 	for _, app := range frontend.Apps {
 		assert.NotNil(t, app.Container)
 		assert.NotNil(t, app.Container.Docker)
-		assert.Equal(t, app.Container.Docker.Network, "BRIDGE")
-		if len(*app.Container.Docker.PortMappings) == 0 {
+		log.Println(app)
+		for _, network := range *app.Networks {
+			assert.Equal(t, network.Mode, "container/bridge")
+		}
+		if len(*app.Container.PortMappings) == 0 {
 			t.Fail()
 		}
 	}

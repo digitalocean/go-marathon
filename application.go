@@ -54,6 +54,11 @@ type Port struct {
 	Protocol string `json:"protocol,omitempty"`
 }
 
+// Network providers info about application networking
+type Network struct {
+	Mode string `json:"mode,omitempty"`
+}
+
 // Application is the definition for an application in marathon
 type Application struct {
 	ID          string      `json:"id,omitempty"`
@@ -64,6 +69,8 @@ type Application struct {
 	CPUs        float64     `json:"cpus,omitempty"`
 	GPUs        *float64    `json:"gpus,omitempty"`
 	Disk        *float64    `json:"disk,omitempty"`
+	Networks    *[]Network  `json:"networks,omitempty"`
+
 	// Contains non-secret environment variables. Secrets environment variables are part of the Secrets map.
 	Env                        *map[string]string  `json:"-"`
 	Executor                   *string             `json:"executor,omitempty"`
@@ -493,7 +500,7 @@ func (r *Application) CheckHTTP(path string, port, interval int) (*Application, 
 		return nil, ErrNoApplicationContainer
 	}
 	// step: get the port index
-	portIndex, err := r.Container.Docker.ServicePortIndex(port)
+	portIndex, err := r.Container.ServicePortIndex(port)
 	if err != nil {
 		return nil, err
 	}
@@ -516,7 +523,7 @@ func (r *Application) CheckTCP(port, interval int) (*Application, error) {
 		return nil, ErrNoApplicationContainer
 	}
 	// step: get the port index
-	portIndex, err := r.Container.Docker.ServicePortIndex(port)
+	portIndex, err := r.Container.ServicePortIndex(port)
 	if err != nil {
 		return nil, err
 	}
@@ -972,4 +979,34 @@ func (d *Discovery) AddPort(port Port) *Discovery {
 	ports = append(ports, port)
 	d.Ports = &ports
 	return d
+}
+
+// EmptyNetworks explicitly empties networks
+func (r *Application) EmptyNetworks() *Application {
+	r.Networks = &[]Network{}
+	return r
+}
+
+// Bridged sets the networking mode to bridged
+func (r *Application) Bridged() *Application {
+	if r.Networks == nil {
+		r.EmptyNetworks()
+	}
+	network := Network{Mode: "container/bridge"}
+	networks := *r.Networks
+	networks = append(networks, network)
+	r.Networks = &networks
+	return r
+}
+
+// Host sets the networking mode to host
+func (r *Application) Host() *Application {
+	if r.Networks == nil {
+		r.EmptyNetworks()
+	}
+	network := Network{Mode: "host"}
+	networks := *r.Networks
+	networks = append(networks, network)
+	r.Networks = &networks
+	return r
 }

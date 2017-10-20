@@ -87,22 +87,21 @@
             "constraints": [],
             "container": {
                 "docker": {
-                    "image": "python:3",
-                    "network": "BRIDGE",
-                    "portMappings": [
-                        {
-                            "containerPort": 8080,
-                            "hostPort": 0,
-                            "servicePort": 9000,
-                            "protocol": "tcp"
-                        },
-                        {
-                            "containerPort": 161,
-                            "hostPort": 0,
-                            "protocol": "udp"
-                        }
-                    ]
+                    "image": "python:3"
                 },
+                "portMappings": [
+                    {
+                        "containerPort": 8080,
+                        "hostPort": 0,
+                        "servicePort": 9000,
+                        "protocol": "tcp"
+                    },
+                    {
+                        "containerPort": 161,
+                        "hostPort": 0,
+                        "protocol": "udp"
+                    }
+                ],
                 "type": "DOCKER",
                 "volumes": []
             },
@@ -110,6 +109,11 @@
             "dependencies": [],
             "deployments": [],
             "disk": 0.0,
+            "networks": [
+                {
+                    "mode": "container/bridge"
+                }
+            ],
             "env": {
                 "VAR": "VALUE",
                 "SECRET1": {
@@ -160,22 +164,21 @@
             "constraints": [],
             "container": {
                 "docker": {
-                    "image": "python:3",
-                    "network": "BRIDGE",
-                    "portMappings": [
-                        {
-                            "containerPort": 8080,
-                            "hostPort": 0,
-                            "servicePort": 9000,
-                            "protocol": "tcp"
-                        },
-                        {
-                            "containerPort": 161,
-                            "hostPort": 0,
-                            "protocol": "udp"
-                        }
-                    ]
+                    "image": "python:3"
                 },
+                "portMappings": [
+                    {
+                        "containerPort": 8080,
+                        "hostPort": 0,
+                        "servicePort": 9000,
+                        "protocol": "tcp"
+                    },
+                    {
+                        "containerPort": 161,
+                        "hostPort": 0,
+                        "protocol": "udp"
+                    }
+                ],
                 "type": "DOCKER",
                 "volumes": []
             },
@@ -183,6 +186,11 @@
             "dependencies": [],
             "deployments": [],
             "disk": 0.0,
+            "networks": [
+                {
+                    "mode": "container/bridge"
+                }
+            ],
             "env": {},
             "executor": "",
             "healthChecks": [
@@ -313,17 +321,16 @@
         "constraints": [],
         "container": {
             "docker": {
-                "image": "python:3",
-                "network": "BRIDGE",
-                "portMappings": [
-                    {
-                        "containerPort": 8080,
-                        "hostPort": 0,
-                        "servicePort": 9000,
-                        "protocol": "tcp"
-                    }
-                ]
+                "image": "python:3"
             },
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 0,
+                    "servicePort": 9000,
+                    "protocol": "tcp"
+                }
+            ],
             "type": "DOCKER",
             "volumes": []
         },
@@ -331,6 +338,11 @@
         "dependencies": [],
         "deployments": [],
         "disk": 0.0,
+        "networks": [
+            {
+                "mode": "container/bridge"
+            }
+        ],
         "env": {},
         "executor": "",
         "healthChecks": [
@@ -434,17 +446,16 @@
         "constraints": [],
         "container": {
             "docker": {
-                "image": "python:3",
-                "network": "BRIDGE",
-                "portMappings": [
-                    {
-                        "containerPort": 8080,
-                        "hostPort": 0,
-                        "servicePort": 9000,
-                        "protocol": "tcp"
-                    }
-                ]
+                "image": "python:3"
             },
+             "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 0,
+                    "servicePort": 9000,
+                    "protocol": "tcp"
+                }
+            ],
             "type": "DOCKER",
             "volumes": []
         },
@@ -452,6 +463,11 @@
         "dependencies": [],
         "deployments": [],
         "disk": 0.0,
+        "networks": [
+            {
+                "mode": "container/bridge"
+            }
+        ],
         "env": {},
         "executor": "",
         "healthChecks": [
@@ -568,17 +584,16 @@
         "constraints": [],
         "container": {
             "docker": {
-                "image": "python:3",
-                "network": "BRIDGE",
-                "portMappings": [
-                    {
-                        "containerPort": 8080,
-                        "hostPort": 0,
-                        "servicePort": 9000,
-                        "protocol": "tcp"
-                    }
-                ]
+                "image": "python:3"
             },
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 0,
+                    "servicePort": 9000,
+                    "protocol": "tcp"
+                }
+            ],
             "type": "DOCKER",
             "volumes": []
         },
@@ -586,6 +601,11 @@
         "dependencies": [],
         "deployments": [],
         "disk": 0.0,
+        "networks": [
+            {
+                "mode": "container/bridge"
+            }
+        ],
         "env": {},
         "executor": "",
         "healthChecks": [
@@ -801,9 +821,9 @@
               "container": {
                 "type": "DOCKER",
                 "docker": {
-                  "image": "quay.io/gambol99/apache-php:latest",
-                  "network": "BRIDGE",
-                  "portMappings": [
+                  "image": "quay.io/gambol99/apache-php:latest"
+                },
+                "portMappings": [
                     {
                       "containerPort": 80,
                       "hostPort": 0,
@@ -814,8 +834,7 @@
                       "hostPort": 0,
                       "protocol": "tcp"
                     }
-                  ]
-                }
+                ]
               },
               "healthChecks": [
                 {
@@ -831,6 +850,11 @@
               "id": "apache",
               "mem": 64,
               "args": [],
+              "networks": [
+                {
+                  "mode": "container/bridge"
+                }
+              ],
               "env": {
                 "ENVIRONMENT": "qa",
                 "SERVICE_80_NAME": "apache_http-qa-1",
@@ -848,12 +872,11 @@
               "container": {
                 "type": "DOCKER",
                 "docker": {
-                  "image": "tutum/mysql",
-                  "network": "BRIDGE",
-                  "portMappings": [
-                    { "containerPort": 3306, "hostPort": 0, "protocol": "tcp" }
-                  ]
-                }
+                  "image": "tutum/mysql"
+                },
+                "portMappings": [
+                  { "containerPort": 3306, "hostPort": 0, "protocol": "tcp" }
+                ]
               },
               "healthChecks": [
                 {
@@ -868,6 +891,11 @@
               "id": "mysql",
               "mem": 1024,
               "cmd": "",
+              "networks": [
+                {
+                  "mode": "container/bridge"
+                }
+              ],
               "env": {
                 "ENVIRONMENT": "qa",
                 "SERVICE_NAME": "dbmaster",
@@ -881,16 +909,15 @@
               "container": {
                 "type": "DOCKER",
                 "docker": {
-                  "image": "redis",
-                  "network": "BRIDGE",
-                  "portMappings": [
+                  "image": "redis"
+                },
+                "portMappings": [
                     {
                       "containerPort": 6379,
                       "hostPort": 0,
                       "protocol": "tcp"
                     }
-                  ]
-                }
+                ]
               },
               "healthChecks": [
                 {
@@ -905,6 +932,11 @@
               "id": "caching",
               "cmd": "",
               "mem": 128,
+              "networks": [
+                {
+                  "mode": "container/bridge"
+                }
+              ],
               "env": {
                 "ENVIRONMENT": "qa",
                 "SERVICE_6379_NAME": "redis-qa-1"
