@@ -710,3 +710,24 @@ func TestUpgradeStrategy(t *testing.T) {
 	assert.Nil(t, us.MinimumHealthCapacity)
 	assert.Nil(t, us.MaximumOverCapacity)
 }
+
+func TestBridgedNetworking(t *testing.T) {
+	app := NewDockerApplication().BridgedNetwork("")
+	networks := *app.Networks
+
+	assert.Equal(t, networks[0].Mode, "container/bridge")
+}
+
+func TestContainerNetworking(t *testing.T) {
+	app := NewDockerApplication().ContainerNetwork("test")
+	networks := *app.Networks
+
+	assert.Equal(t, networks[0].Mode, "container")
+}
+
+func TestHostNetworking(t *testing.T) {
+	app := NewDockerApplication().HostNetwork("")
+	networks := *app.Networks
+
+	assert.Equal(t, networks[0].Mode, "host")
+}
