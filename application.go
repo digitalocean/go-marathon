@@ -34,14 +34,6 @@ type Applications struct {
 	Apps []Application `json:"apps"`
 }
 
-// IPAddressPerTask is used by IP-per-task functionality https://mesosphere.github.io/marathon/docs/ip-per-task.html
-type IPAddressPerTask struct {
-	Groups      *[]string          `json:"groups,omitempty"`
-	Labels      *map[string]string `json:"labels,omitempty"`
-	Discovery   *Discovery         `json:"discovery,omitempty"`
-	NetworkName string             `json:"networkName,omitempty"`
-}
-
 // Discovery provides info about ports expose by IP-per-task functionality
 type Discovery struct {
 	Ports *[]Port `json:"ports,omitempty"`
@@ -106,7 +98,6 @@ type Application struct {
 	AcceptedResourceRoles []string                `json:"acceptedResourceRoles,omitempty"`
 	LastTaskFailure       *LastTaskFailure        `json:"lastTaskFailure,omitempty"`
 	Fetch                 *[]Fetch                `json:"fetch,omitempty"`
-	IPAddressPerTask      *IPAddressPerTask       `json:"ipAddress,omitempty"`
 	Residency             *Residency              `json:"residency,omitempty"`
 	Secrets               *map[string]Secret      `json:"-"`
 }
@@ -165,17 +156,6 @@ type Stats struct {
 type Secret struct {
 	EnvVar string
 	Source string
-}
-
-// SetIPAddressPerTask defines that the application will have a IP address defines by a external agent.
-// This configuration is not allowed to be used with Port or PortDefinitions. Thus, the implementation
-// clears both.
-func (r *Application) SetIPAddressPerTask(ipAddressPerTask IPAddressPerTask) *Application {
-	r.Ports = make([]int, 0)
-	r.EmptyPortDefinitions()
-	r.IPAddressPerTask = &ipAddressPerTask
-
-	return r
 }
 
 // NewDockerApplication creates a default docker application
@@ -913,52 +893,6 @@ func buildPathWithForceParam(rootPath string, force bool) string {
 
 func buildPath(path string) string {
 	return fmt.Sprintf("%s/%s", marathonAPIApps, trimRootPath(path))
-}
-
-// EmptyLabels explicitly empties labels -- use this if you need to empty
-// labels of an application that already has IP per task with labels defined
-func (i *IPAddressPerTask) EmptyLabels() *IPAddressPerTask {
-	i.Labels = &map[string]string{}
-	return i
-}
-
-// AddLabel adds a label to an IPAddressPerTask
-//    name: The label name
-//   value: The label value
-func (i *IPAddressPerTask) AddLabel(name, value string) *IPAddressPerTask {
-	if i.Labels == nil {
-		i.EmptyLabels()
-	}
-	(*i.Labels)[name] = value
-	return i
-}
-
-// EmptyGroups explicitly empties groups -- use this if you need to empty
-// groups of an application that already has IP per task with groups defined
-func (i *IPAddressPerTask) EmptyGroups() *IPAddressPerTask {
-	i.Groups = &[]string{}
-	return i
-}
-
-// AddGroup adds a group to an IPAddressPerTask
-//  group: The group name
-func (i *IPAddressPerTask) AddGroup(group string) *IPAddressPerTask {
-	if i.Groups == nil {
-		i.EmptyGroups()
-	}
-
-	groups := *i.Groups
-	groups = append(groups, group)
-	i.Groups = &groups
-
-	return i
-}
-
-// SetDiscovery define the discovery to an IPAddressPerTask
-//  discovery: The discovery struct
-func (i *IPAddressPerTask) SetDiscovery(discovery Discovery) *IPAddressPerTask {
-	i.Discovery = &discovery
-	return i
 }
 
 // EmptyPorts explicitly empties discovey port -- use this if you need to empty
