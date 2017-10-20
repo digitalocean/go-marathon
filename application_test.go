@@ -49,7 +49,7 @@ func TestApplicationString(t *testing.T) {
 		Memory(64).
 		Storage(0.0).
 		Count(2).
-		Bridged().
+		BridgedNetwork("").
 		AddArgs("/usr/sbin/apache2ctl", "-D", "FOREGROUND").
 		AddEnv("NAME", "frontend_http").
 		AddEnv("SERVICE_80_NAME", "test_http")

@@ -48,6 +48,7 @@ type Port struct {
 
 // Network providers info about application networking
 type Network struct {
+	Name string `json:"name,omitempty"`
 	Mode string `json:"mode,omitempty"`
 }
 
@@ -922,11 +923,23 @@ func (r *Application) EmptyNetworks() *Application {
 }
 
 // Bridged sets the networking mode to bridged
-func (r *Application) Bridged() *Application {
+func (r *Application) BridgedNetwork(name string) *Application {
 	if r.Networks == nil {
 		r.EmptyNetworks()
 	}
-	network := Network{Mode: "container/bridge"}
+	network := Network{Name: name, Mode: "container/bridge"}
+	networks := *r.Networks
+	networks = append(networks, network)
+	r.Networks = &networks
+	return r
+}
+
+// Bridged sets the networking mode to container
+func (r *Application) ContainerNetwork(name string) *Application {
+	if r.Networks == nil {
+		r.EmptyNetworks()
+	}
+	network := Network{Name: name, Mode: "container"}
 	networks := *r.Networks
 	networks = append(networks, network)
 	r.Networks = &networks
@@ -934,11 +947,11 @@ func (r *Application) Bridged() *Application {
 }
 
 // Host sets the networking mode to host
-func (r *Application) Host() *Application {
+func (r *Application) HostNetwork(name string) *Application {
 	if r.Networks == nil {
 		r.EmptyNetworks()
 	}
-	network := Network{Mode: "host"}
+	network := Network{Name: name, Mode: "host"}
 	networks := *r.Networks
 	networks = append(networks, network)
 	r.Networks = &networks

@@ -37,6 +37,7 @@ type PortMapping struct {
 	Name          string             `json:"name,omitempty"`
 	ServicePort   int                `json:"servicePort,omitempty"`
 	Protocol      string             `json:"protocol,omitempty"`
+	NetworkNames  []string           `json:"networkNames,omitempty"`
 }
 
 // Parameters is the parameters to pass to the docker client when creating the container
@@ -353,3 +354,24 @@ func (container *Container) ServicePortIndex(port int) (int, error) {
 	// step: we didn't find the port in the mappings
 	return 0, fmt.Errorf("The container port required was not found in the container port mappings")
 }
+
+// // AddNetwork adds a network name to a PortMapping
+// //		name:	the name of the network
+// func (p *PortMapping) AddNetwork(name string) *PortMapping {
+// 	if p.NetworkNames == nil {
+// 		p.EmptyNetworkNames()
+// 	}
+// 	networks := *p.NetworkNames
+// 	networks = append(networks, name)
+// 	p.NetworkNames = &networks
+// 	return p
+// }
+
+// // EmptyLabels explicitly empties the labels -- use this if you need to empty
+// // the labels of a port mapping that already has labels set (setting labels to
+// // nil will keep the current value)
+// func (p *PortMapping) EmptyNetworkNames() *PortMapping {
+// 	p.NetworkNames = &[]string
+
+// 	return p
+// }
