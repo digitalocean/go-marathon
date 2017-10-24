@@ -57,9 +57,6 @@
       "id": "/fake-app",
       "instances": 2,
       "mem": 50.0,
-      "ports": [
-          0
-      ],
       "requirePorts": false,
       "residency" : {
           "taskLostBehavior" : "RELAUNCH_AFTER_TIMEOUT",
@@ -70,7 +67,6 @@
           "minimumHealthCapacity": 0.5,
           "maximumOverCapacity": 0.5
       },
-      "uris": [],
       "user": null,
       "version": "2014-08-18T22:36:41.451Z"
     }
@@ -136,10 +132,6 @@
             "id": "/fake-app",
             "instances": 2,
             "mem": 64.0,
-            "ports": [
-                10000,
-                10001
-            ],
             "requirePorts": false,
             "secrets": {
                 "secret0": {
@@ -152,7 +144,6 @@
             "upgradeStrategy": {
                 "minimumHealthCapacity": 1.0
             },
-            "uris": [],
             "user": null,
             "version": "2014-09-25T02:26:59.256Z"
         },
@@ -208,10 +199,6 @@
             "id": "/fake-app-broken",
             "instances": 2,
             "mem": 64.0,
-            "ports": [
-                10000,
-                10001
-            ],
             "requirePorts": false,
             "residency" : {
                 "taskLostBehavior" : "RELAUNCH_AFTER_TIMEOUT",
@@ -223,7 +210,6 @@
             "upgradeStrategy": {
                 "minimumHealthCapacity": 1.0
             },
-            "uris": [],
             "user": null,
             "version": "2014-09-25T02:26:59.256Z"
         }
@@ -370,9 +356,6 @@
             "version": "2014-09-12T23:28:21.737Z"
         },
         "mem": 32.0,
-        "ports": [
-            10000
-        ],
         "requirePorts": false,
         "residency" : {
             "taskLostBehavior" : "RELAUNCH_AFTER_TIMEOUT",
@@ -428,9 +411,6 @@
         "upgradeStrategy": {
             "minimumHealthCapacity": 1.0
         },
-        "uris": [
-            "http://downloads.mesosphere.com/misc/toggle.tgz"
-        ],
         "user": null,
         "version": "2014-09-12T23:28:21.737Z"
     }
@@ -495,9 +475,6 @@
             "version": "2014-09-12T23:28:21.737Z"
         },
         "mem": 32.0,
-        "ports": [
-            10000
-        ],
         "requirePorts": false,
         "residency" : {
             "taskLostBehavior" : "RELAUNCH_AFTER_TIMEOUT",
@@ -553,9 +530,6 @@
         "upgradeStrategy": {
             "minimumHealthCapacity": 1.0
         },
-        "uris": [
-            "http://downloads.mesosphere.com/misc/toggle.tgz"
-        ],
         "user": null,
         "version": "2014-09-12T23:28:21.737Z"
     }
@@ -632,9 +606,6 @@
             "version": "2014-09-12T23:28:21.737Z"
         },
         "mem": 32.0,
-        "ports": [
-            10000
-        ],
         "requirePorts": false,
         "residency" : {
             "taskLostBehavior" : "RELAUNCH_AFTER_TIMEOUT",
@@ -690,9 +661,6 @@
         "upgradeStrategy": {
             "minimumHealthCapacity": 1.0
         },
-        "uris": [
-            "http://downloads.mesosphere.com/misc/toggle.tgz"
-        ],
         "user": null,
         "version": "2014-09-12T23:28:21.737Z"
     }
@@ -745,15 +713,11 @@
                         "id": "/test/app",
                         "instances": 1,
                         "mem": 128.0,
-                        "ports": [
-                            10000
-                        ],
                         "requirePorts": false,
                         "storeUrls": [],
                         "upgradeStrategy": {
                             "minimumHealthCapacity": 1.0
                         },
-                        "uris": [],
                         "user": null,
                         "version": "2014-08-28T01:05:40.586Z"
                     }
@@ -789,15 +753,11 @@
                 "id": "/test/app",
                 "instances": 1,
                 "mem": 128.0,
-                "ports": [
-                    10000
-                ],
                 "requirePorts": false,
                 "storeUrls": [],
                 "upgradeStrategy": {
                     "minimumHealthCapacity": 1.0
                 },
-                "uris": [],
                 "user": null,
                 "version": "2014-08-28T01:05:40.586Z"
             }
@@ -1164,15 +1124,11 @@
                     "id": "/test",
                     "instances": 3,
                     "mem": 32.0,
-                    "ports": [10000],
                     "requirePorts": false,
                     "storeUrls": [],
                     "upgradeStrategy": {
                         "minimumHealthCapacity": 1.0
                     },
-                    "uris": [
-                        "http://downloads.mesosphere.com/misc/toggle.tgz"
-                    ],
                     "user": null,
                     "version": "2014-08-26T05:04:49.766Z"
                 }
@@ -1297,10 +1253,6 @@
             "id": "/fake-app",
             "instances": 2,
             "mem": 64.0,
-            "ports": [
-                10000,
-                10001
-            ],
             "requirePorts": false,
             "residency" : {
                 "taskLostBehavior" : "RELAUNCH_AFTER_TIMEOUT",
@@ -1312,7 +1264,6 @@
             "upgradeStrategy": {
                 "minimumHealthCapacity": 1.0
             },
-            "uris": [],
             "user": null,
             "version": "2014-09-25T02:26:59.256Z"
         },
@@ -1364,10 +1315,6 @@
             "id": "/fake-app-broken",
             "instances": 2,
             "mem": 64.0,
-            "ports": [
-                10000,
-                10001
-            ],
             "requirePorts": false,
             "storeUrls": [],
             "tasksRunning": 2,
@@ -1375,7 +1322,6 @@
             "upgradeStrategy": {
                 "minimumHealthCapacity": 1.0
             },
-            "uris": [],
             "user": null,
             "version": "2014-09-25T02:26:59.256Z"
         }
@@ -1401,9 +1347,6 @@
         "id": "/no-health-check-results-app",
         "instances": 2,
         "mem": 32.0,
-        "ports": [
-            10000
-        ],
         "tasks": [
             {
                 "appId": "/no-health-check-results-app",

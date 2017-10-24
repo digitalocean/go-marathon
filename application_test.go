@@ -459,20 +459,6 @@ func TestRestartApplication(t *testing.T) {
 	assert.Nil(t, id)
 }
 
-func TestApplicationUris(t *testing.T) {
-	app := NewDockerApplication()
-	assert.Nil(t, app.Uris)
-	app.AddUris("file://uri1.tar.gz").AddUris("file://uri2.tar.gz", "file://uri3.tar.gz")
-	assert.Equal(t, 3, len(*app.Uris))
-	assert.Equal(t, "file://uri1.tar.gz", (*app.Uris)[0])
-	assert.Equal(t, "file://uri2.tar.gz", (*app.Uris)[1])
-	assert.Equal(t, "file://uri3.tar.gz", (*app.Uris)[2])
-
-	app.EmptyUris()
-	assert.NotNil(t, app.Uris)
-	assert.Equal(t, 0, len(*app.Uris))
-}
-
 func TestApplicationFetchURIs(t *testing.T) {
 	app := NewDockerApplication()
 	assert.Nil(t, app.Fetch)
@@ -483,9 +469,9 @@ func TestApplicationFetchURIs(t *testing.T) {
 	assert.Equal(t, Fetch{URI: "file://uri2.tar.gz"}, (*app.Fetch)[1])
 	assert.Equal(t, Fetch{URI: "file://uri3.tar.gz"}, (*app.Fetch)[2])
 
-	app.EmptyUris()
-	assert.NotNil(t, app.Uris)
-	assert.Equal(t, 0, len(*app.Uris))
+	app.EmptyFetchURIs()
+	assert.NotNil(t, app.Fetch)
+	assert.Equal(t, 0, len(*app.Fetch))
 }
 
 func TestSetApplicationVersion(t *testing.T) {

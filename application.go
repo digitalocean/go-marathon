@@ -72,7 +72,6 @@ type Application struct {
 	Instances                  *int                `json:"instances,omitempty"`
 	Mem                        *float64            `json:"mem,omitempty"`
 	Tasks                      []*Task             `json:"tasks,omitempty"`
-	Ports                      []int               `json:"ports"`
 	PortDefinitions            *[]PortDefinition   `json:"portDefinitions,omitempty"`
 	RequirePorts               *bool               `json:"requirePorts,omitempty"`
 	BackoffSeconds             *float64            `json:"backoffSeconds,omitempty"`
@@ -92,7 +91,6 @@ type Application struct {
 	UpgradeStrategy       *UpgradeStrategy        `json:"upgradeStrategy,omitempty"`
 	UnreachableStrategy   *UnreachableStrategy    `json:"unreachableStrategy,omitempty"`
 	KillSelection         string                  `json:"killSelection,omitempty"`
-	Uris                  *[]string               `json:"uris,omitempty"`
 	Version               string                  `json:"version,omitempty"`
 	VersionInfo           *VersionInfo            `json:"versionInfo,omitempty"`
 	Labels                *map[string]string      `json:"labels,omitempty"`
@@ -516,29 +514,6 @@ func (r *Application) CheckTCP(port, interval int) (*Application, error) {
 	r.AddHealthCheck(*health)
 
 	return r, nil
-}
-
-// AddUris adds one or more uris to the applications
-//		arguments:	the uri(s) you are adding
-func (r *Application) AddUris(newUris ...string) *Application {
-	if r.Uris == nil {
-		r.EmptyUris()
-	}
-
-	uris := *r.Uris
-	uris = append(uris, newUris...)
-	r.Uris = &uris
-
-	return r
-}
-
-// EmptyUris explicitly empties uris -- use this if you need to empty
-// uris of an application that already has uris set (setting uris to nil will
-// keep the current value)
-func (r *Application) EmptyUris() *Application {
-	r.Uris = &[]string{}
-
-	return r
 }
 
 // AddFetchURIs adds one or more fetch URIs to the application.
