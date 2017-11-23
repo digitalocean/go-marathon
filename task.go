@@ -184,9 +184,12 @@ func (r *marathonClient) TaskEndpoints(name string, port int, healthCheck bool) 
 	}
 
 	// step: we need to get the port index of the service we are interested in
-	portIndex, err := application.Container.ContainerServicePortIndex(port)
+	portIndex, err := application.Container.Docker.ServicePortIndex(port)
 	if err != nil {
-		return nil, err
+		portIndex, err = application.Container.ContainerServicePortIndex(port)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// step: do we have any tasks?
