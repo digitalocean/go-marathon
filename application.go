@@ -107,8 +107,8 @@ type Application struct {
 	AcceptedResourceRoles []string                `json:"acceptedResourceRoles,omitempty"`
 	LastTaskFailure       *LastTaskFailure        `json:"lastTaskFailure,omitempty"`
 	Fetch                 *[]Fetch                `json:"fetch,omitempty"`
-	Residency             *Residency              `json:"residency,omitempty"`
 	IPAddressPerTask      *IPAddressPerTask       `json:"ipAddress,omitempty"`
+	Residency             *Residency              `json:"residency,omitempty"`
 	Secrets               *map[string]Secret      `json:"-"`
 }
 
@@ -501,9 +501,12 @@ func (r *Application) CheckHTTP(path string, port, interval int) (*Application, 
 		return nil, ErrNoApplicationContainer
 	}
 	// step: get the port index
-	portIndex, err := r.Container.ServicePortIndex(port)
+	portIndex, err := r.Container.Docker.ServicePortIndex(port)
 	if err != nil {
-		return nil, err
+		portIndex, err = r.Container.ContainerServicePortIndex(port)
+		if err != nil {
+			return nil, err
+		}
 	}
 	health := NewDefaultHealthCheck()
 	health.IntervalSeconds = interval
@@ -524,9 +527,12 @@ func (r *Application) CheckTCP(port, interval int) (*Application, error) {
 		return nil, ErrNoApplicationContainer
 	}
 	// step: get the port index
-	portIndex, err := r.Container.ServicePortIndex(port)
+	portIndex, err := r.Container.Docker.ServicePortIndex(port)
 	if err != nil {
-		return nil, err
+		portIndex, err = r.Container.ContainerServicePortIndex(port)
+		if err != nil {
+			return nil, err
+		}
 	}
 	health := NewDefaultHealthCheck()
 	health.Protocol = "TCP"

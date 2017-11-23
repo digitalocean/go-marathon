@@ -398,9 +398,9 @@ func (docker *Docker) EmptyParameters() *Docker {
 	return docker
 }
 
-// ServicePortIndex finds the service port index of the exposed port
+// ContainerServicePortIndex finds the service port index of the exposed port
 //		port:			the port you are looking for
-func (container *Container) ServicePortIndex(port int) (int, error) {
+func (container *Container) ContainerServicePortIndex(port int) (int, error) {
 	if container.PortMappings == nil || len(*container.PortMappings) == 0 {
 		return 0, errors.New("The docker does not contain any port mappings to search")
 	}
@@ -416,9 +416,9 @@ func (container *Container) ServicePortIndex(port int) (int, error) {
 	return 0, fmt.Errorf("The container port required was not found in the container port mappings")
 }
 
-// ContainerServicePortIndex finds the service port index of the exposed port
+// ServicePortIndex finds the service port index of the exposed port
 //		port:			the port you are looking for
-func (docker *Docker) ContainerServicePortIndex(port int) (int, error) {
+func (docker *Docker) ServicePortIndex(port int) (int, error) {
 	if docker.PortMappings == nil || len(*docker.PortMappings) == 0 {
 		return 0, errors.New("The docker does not contain any port mappings to search")
 	}
