@@ -49,12 +49,12 @@ func TestApplicationString(t *testing.T) {
 		Memory(64).
 		Storage(0.0).
 		Count(2).
-		BridgedNetwork("").
+		SetNetwork("", "container/bridge").
 		AddArgs("/usr/sbin/apache2ctl", "-D", "FOREGROUND").
 		AddEnv("NAME", "frontend_http").
 		AddEnv("SERVICE_80_NAME", "test_http")
 	app.
-		Container.Expose(80).Expose(443).
+		Container.ExposeContainer(80).ExposeContainer(443).
 		Docker.Container("quay.io/gambol99/apache-php:latest")
 
 	app, err := app.CheckHTTP("/health", 80, 5)
@@ -292,7 +292,7 @@ func TestApplicationPortDefinitions(t *testing.T) {
 func TestHasHealthChecks(t *testing.T) {
 	app := NewDockerApplication()
 	assert.False(t, app.HasHealthChecks())
-	app.Container.Expose(80).Docker.Container("quay.io/gambol99/apache-php:latest")
+	app.Container.ExposeContainer(80).Docker.Container("quay.io/gambol99/apache-php:latest")
 	_, err := app.CheckTCP(80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())
@@ -304,7 +304,7 @@ func TestApplicationCheckTCP(t *testing.T) {
 	_, err := app.CheckTCP(80, 10)
 	assert.Error(t, err)
 	assert.False(t, app.HasHealthChecks())
-	app.Container.Expose(80).Docker.Container("quay.io/gambol99/apache-php:latest")
+	app.Container.ExposeContainer(80).Docker.Container("quay.io/gambol99/apache-php:latest")
 	_, err = app.CheckTCP(80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())
@@ -320,7 +320,7 @@ func TestApplicationCheckHTTP(t *testing.T) {
 	_, err := app.CheckHTTP("/", 80, 10)
 	assert.Error(t, err)
 	assert.False(t, app.HasHealthChecks())
-	app.Container.Expose(80).Docker.Container("quay.io/gambol99/apache-php:latest")
+	app.Container.ExposeContainer(80).Docker.Container("quay.io/gambol99/apache-php:latest")
 	_, err = app.CheckHTTP("/health", 80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())
@@ -457,6 +457,20 @@ func TestRestartApplication(t *testing.T) {
 	id, err = endpoint.Client.RestartApplication("/not/there", false)
 	assert.Error(t, err)
 	assert.Nil(t, id)
+}
+
+func TestApplicationUris(t *testing.T) {
+	app := NewDockerApplication()
+	assert.Nil(t, app.Uris)
+	app.AddUris("file://uri1.tar.gz").AddUris("file://uri2.tar.gz", "file://uri3.tar.gz")
+	assert.Equal(t, 3, len(*app.Uris))
+	assert.Equal(t, "file://uri1.tar.gz", (*app.Uris)[0])
+	assert.Equal(t, "file://uri2.tar.gz", (*app.Uris)[1])
+	assert.Equal(t, "file://uri3.tar.gz", (*app.Uris)[2])
+
+	app.EmptyUris()
+	assert.NotNil(t, app.Uris)
+	assert.Equal(t, 0, len(*app.Uris))
 }
 
 func TestApplicationFetchURIs(t *testing.T) {
@@ -680,6 +694,58 @@ func TestAppExistAndRunning(t *testing.T) {
 	assert.False(t, client.appExistAndRunning("no_such_app"))
 }
 
+func TestSetIPPerTask(t *testing.T) {
+	app := Application{}
+	app.Ports = append(app.Ports, 10)
+	app.AddPortDefinition(PortDefinition{})
+	assert.Nil(t, app.IPAddressPerTask)
+	assert.Equal(t, 1, len(app.Ports))
+	assert.Equal(t, 1, len(*app.PortDefinitions))
+
+	app.SetIPAddressPerTask(IPAddressPerTask{})
+	assert.NotNil(t, app.IPAddressPerTask)
+	assert.Equal(t, 0, len(app.Ports))
+	assert.Equal(t, 0, len(*app.PortDefinitions))
+}
+
+func TestIPAddressPerTask(t *testing.T) {
+	ipPerTask := IPAddressPerTask{}
+	assert.Nil(t, ipPerTask.Groups)
+	assert.Nil(t, ipPerTask.Labels)
+	assert.Nil(t, ipPerTask.Discovery)
+
+	ipPerTask.
+		AddGroup("label").
+		AddLabel("key", "value").
+		SetDiscovery(Discovery{})
+
+	assert.Equal(t, 1, len(*ipPerTask.Groups))
+	assert.Equal(t, "label", (*ipPerTask.Groups)[0])
+	assert.Equal(t, "value", (*ipPerTask.Labels)["key"])
+	assert.NotEmpty(t, ipPerTask.Discovery)
+
+	ipPerTask.EmptyGroups()
+	assert.Equal(t, 0, len(*ipPerTask.Groups))
+
+	ipPerTask.EmptyLabels()
+	assert.Equal(t, 0, len(*ipPerTask.Labels))
+
+}
+
+func TestIPAddressPerTaskDiscovery(t *testing.T) {
+	disc := Discovery{}
+	assert.Nil(t, disc.Ports)
+
+	disc.AddPort(Port{})
+	assert.NotNil(t, disc.Ports)
+	assert.Equal(t, 1, len(*disc.Ports))
+
+	disc.EmptyPorts()
+	assert.NotNil(t, disc.Ports)
+	assert.Equal(t, 0, len(*disc.Ports))
+
+}
+
 func TestUpgradeStrategy(t *testing.T) {
 	app := Application{}
 	assert.Nil(t, app.UpgradeStrategy)
@@ -698,21 +764,21 @@ func TestUpgradeStrategy(t *testing.T) {
 }
 
 func TestBridgedNetworking(t *testing.T) {
-	app := NewDockerApplication().BridgedNetwork("")
+	app := NewDockerApplication().SetNetwork("test", "container/bridge")
 	networks := *app.Networks
 
 	assert.Equal(t, networks[0].Mode, "container/bridge")
 }
 
 func TestContainerNetworking(t *testing.T) {
-	app := NewDockerApplication().ContainerNetwork("test")
+	app := NewDockerApplication().SetNetwork("test", "container")
 	networks := *app.Networks
 
 	assert.Equal(t, networks[0].Mode, "container")
 }
 
 func TestHostNetworking(t *testing.T) {
-	app := NewDockerApplication().HostNetwork("")
+	app := NewDockerApplication().SetNetwork("test", "host")
 	networks := *app.Networks
 
 	assert.Equal(t, networks[0].Mode, "host")

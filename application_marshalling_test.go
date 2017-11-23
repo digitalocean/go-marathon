@@ -89,7 +89,7 @@ func TestMalformedPayloadUnmarshal(t *testing.T) {
 
 func TestEnvironmentVariableMarshal(t *testing.T) {
 	testApp := new(Application)
-	targetString := []byte(`{"dependencies":null,"env":{"FOO":"bar","TOP":{"secret":"secret1"}},"secrets":{"secret1":{"source":"/path/to/secret"}}}`)
+	targetString := []byte(`{"ports":null,"dependencies":null,"env":{"FOO":"bar","TOP":{"secret":"secret1"}},"secrets":{"secret1":{"source":"/path/to/secret"}}}`)
 	testApp.AddEnv("FOO", "bar")
 	testApp.AddSecret("TOP", "secret1", "/path/to/secret")
 

@@ -34,6 +34,14 @@ type Applications struct {
 	Apps []Application `json:"apps"`
 }
 
+// IPAddressPerTask is used by IP-per-task functionality https://mesosphere.github.io/marathon/docs/ip-per-task.html
+type IPAddressPerTask struct {
+	Groups      *[]string          `json:"groups,omitempty"`
+	Labels      *map[string]string `json:"labels,omitempty"`
+	Discovery   *Discovery         `json:"discovery,omitempty"`
+	NetworkName string             `json:"networkName,omitempty"`
+}
+
 // Discovery provides info about ports expose by IP-per-task functionality
 type Discovery struct {
 	Ports *[]Port `json:"ports,omitempty"`
@@ -46,7 +54,7 @@ type Port struct {
 	Protocol string `json:"protocol,omitempty"`
 }
 
-// Network providers info about application networking
+// Network provides info about application networking
 type Network struct {
 	Name string `json:"name,omitempty"`
 	Mode string `json:"mode,omitempty"`
@@ -72,6 +80,7 @@ type Application struct {
 	Instances                  *int                `json:"instances,omitempty"`
 	Mem                        *float64            `json:"mem,omitempty"`
 	Tasks                      []*Task             `json:"tasks,omitempty"`
+	Ports                      []int               `json:"ports"`
 	PortDefinitions            *[]PortDefinition   `json:"portDefinitions,omitempty"`
 	RequirePorts               *bool               `json:"requirePorts,omitempty"`
 	BackoffSeconds             *float64            `json:"backoffSeconds,omitempty"`
@@ -91,6 +100,7 @@ type Application struct {
 	UpgradeStrategy       *UpgradeStrategy        `json:"upgradeStrategy,omitempty"`
 	UnreachableStrategy   *UnreachableStrategy    `json:"unreachableStrategy,omitempty"`
 	KillSelection         string                  `json:"killSelection,omitempty"`
+	Uris                  *[]string               `json:"uris,omitempty"`
 	Version               string                  `json:"version,omitempty"`
 	VersionInfo           *VersionInfo            `json:"versionInfo,omitempty"`
 	Labels                *map[string]string      `json:"labels,omitempty"`
@@ -98,6 +108,7 @@ type Application struct {
 	LastTaskFailure       *LastTaskFailure        `json:"lastTaskFailure,omitempty"`
 	Fetch                 *[]Fetch                `json:"fetch,omitempty"`
 	Residency             *Residency              `json:"residency,omitempty"`
+	IPAddressPerTask      *IPAddressPerTask       `json:"ipAddress,omitempty"`
 	Secrets               *map[string]Secret      `json:"-"`
 }
 
@@ -155,6 +166,17 @@ type Stats struct {
 type Secret struct {
 	EnvVar string
 	Source string
+}
+
+// SetIPAddressPerTask defines that the application will have a IP address defines by a external agent.
+// This configuration is not allowed to be used with Port or PortDefinitions. Thus, the implementation
+// clears both.
+func (r *Application) SetIPAddressPerTask(ipAddressPerTask IPAddressPerTask) *Application {
+	r.Ports = make([]int, 0)
+	r.EmptyPortDefinitions()
+	r.IPAddressPerTask = &ipAddressPerTask
+
+	return r
 }
 
 // NewDockerApplication creates a default docker application
@@ -516,6 +538,29 @@ func (r *Application) CheckTCP(port, interval int) (*Application, error) {
 	return r, nil
 }
 
+// AddUris adds one or more uris to the applications
+//		arguments:	the uri(s) you are adding
+func (r *Application) AddUris(newUris ...string) *Application {
+	if r.Uris == nil {
+		r.EmptyUris()
+	}
+
+	uris := *r.Uris
+	uris = append(uris, newUris...)
+	r.Uris = &uris
+
+	return r
+}
+
+// EmptyUris explicitly empties uris -- use this if you need to empty
+// uris of an application that already has uris set (setting uris to nil will
+// keep the current value)
+func (r *Application) EmptyUris() *Application {
+	r.Uris = &[]string{}
+
+	return r
+}
+
 // AddFetchURIs adds one or more fetch URIs to the application.
 //		fetchURIs:	the fetch URI(s) to add.
 func (r *Application) AddFetchURIs(fetchURIs ...Fetch) *Application {
@@ -871,6 +916,52 @@ func buildPath(path string) string {
 	return fmt.Sprintf("%s/%s", marathonAPIApps, trimRootPath(path))
 }
 
+// EmptyLabels explicitly empties labels -- use this if you need to empty
+// labels of an application that already has IP per task with labels defined
+func (i *IPAddressPerTask) EmptyLabels() *IPAddressPerTask {
+	i.Labels = &map[string]string{}
+	return i
+}
+
+// AddLabel adds a label to an IPAddressPerTask
+//    name: The label name
+//   value: The label value
+func (i *IPAddressPerTask) AddLabel(name, value string) *IPAddressPerTask {
+	if i.Labels == nil {
+		i.EmptyLabels()
+	}
+	(*i.Labels)[name] = value
+	return i
+}
+
+// EmptyGroups explicitly empties groups -- use this if you need to empty
+// groups of an application that already has IP per task with groups defined
+func (i *IPAddressPerTask) EmptyGroups() *IPAddressPerTask {
+	i.Groups = &[]string{}
+	return i
+}
+
+// AddGroup adds a group to an IPAddressPerTask
+//  group: The group name
+func (i *IPAddressPerTask) AddGroup(group string) *IPAddressPerTask {
+	if i.Groups == nil {
+		i.EmptyGroups()
+	}
+
+	groups := *i.Groups
+	groups = append(groups, group)
+	i.Groups = &groups
+
+	return i
+}
+
+// SetDiscovery define the discovery to an IPAddressPerTask
+//  discovery: The discovery struct
+func (i *IPAddressPerTask) SetDiscovery(discovery Discovery) *IPAddressPerTask {
+	i.Discovery = &discovery
+	return i
+}
+
 // EmptyPorts explicitly empties discovey port -- use this if you need to empty
 // discovey port of an application that already has IP per task with discovey ports
 // defined
@@ -897,36 +988,13 @@ func (r *Application) EmptyNetworks() *Application {
 	return r
 }
 
-// BridgedNetwork sets the networking mode to bridged
-func (r *Application) BridgedNetwork(name string) *Application {
+// SetNetwork sets the networking mode
+func (r *Application) SetNetwork(name string, mode string) *Application {
 	if r.Networks == nil {
 		r.EmptyNetworks()
 	}
-	network := Network{Name: name, Mode: "container/bridge"}
-	networks := *r.Networks
-	networks = append(networks, network)
-	r.Networks = &networks
-	return r
-}
 
-// ContainerNetwork sets the networking mode to container
-func (r *Application) ContainerNetwork(name string) *Application {
-	if r.Networks == nil {
-		r.EmptyNetworks()
-	}
-	network := Network{Name: name, Mode: "container"}
-	networks := *r.Networks
-	networks = append(networks, network)
-	r.Networks = &networks
-	return r
-}
-
-// HostNetwork sets the networking mode to host
-func (r *Application) HostNetwork(name string) *Application {
-	if r.Networks == nil {
-		r.EmptyNetworks()
-	}
-	network := Network{Name: name, Mode: "host"}
+	network := Network{Name: name, Mode: mode}
 	networks := *r.Networks
 	networks = append(networks, network)
 	r.Networks = &networks
