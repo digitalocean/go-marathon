@@ -42,7 +42,7 @@ func TestApplicationMemory(t *testing.T) {
 	assert.Equal(t, 50.0, *app.Mem)
 }
 
-func TestApplicationString(t *testing.T) {
+func TestNewApplicationString(t *testing.T) {
 	app := NewDockerApplication().
 		Name("my-app").
 		CPU(0.1).
@@ -60,7 +60,7 @@ func TestApplicationString(t *testing.T) {
 	app, err := app.CheckHTTP("/health", 80, 5)
 	assert.Nil(t, err)
 
-	expectedAppJSONBytes, err := ioutil.ReadFile("tests/app-definitions/TestApplicationString-output.json")
+	expectedAppJSONBytes, err := ioutil.ReadFile("tests/app-definitions/TestApplicationString-1.5-output.json")
 	if err != nil {
 		panic(err)
 	}
@@ -68,6 +68,31 @@ func TestApplicationString(t *testing.T) {
 	assert.Equal(t, expectedAppJSON, app.String())
 }
 
+func TestApplicationString(t *testing.T) {
+	app := NewDockerApplication().
+		Name("my-app").
+		CPU(0.1).
+		Memory(64).
+		Storage(0.0).
+		Count(2).
+		AddArgs("/usr/sbin/apache2ctl", "-D", "FOREGROUND").
+		AddEnv("NAME", "frontend_http").
+		AddEnv("SERVICE_80_NAME", "test_http")
+	app.
+		Container.Docker.Container("quay.io/gambol99/apache-php:latest").
+		Bridged().
+		Expose(80).
+		Expose(443)
+	app, err := app.CheckHTTP("/health", 80, 5)
+	assert.Nil(t, err)
+
+	expectedAppJSONBytes, err := ioutil.ReadFile("tests/app-definitions/TestApplicationString-output.json")
+	if err != nil {
+		panic(err)
+	}
+	expectedAppJSON := strings.TrimSpace(string(expectedAppJSONBytes))
+	assert.Equal(t, expectedAppJSON, app.String())
+}
 func TestApplicationCount(t *testing.T) {
 	app := NewDockerApplication()
 	assert.Nil(t, app.Instances)
@@ -289,7 +314,7 @@ func TestApplicationPortDefinitions(t *testing.T) {
 	assert.Equal(t, 0, len(*app.PortDefinitions))
 }
 
-func TestHasHealthChecks(t *testing.T) {
+func TestNewHasHealthChecks(t *testing.T) {
 	app := NewDockerApplication()
 	assert.False(t, app.HasHealthChecks())
 	app.Container.ExposeContainer(80).Docker.Container("quay.io/gambol99/apache-php:latest")
@@ -298,7 +323,16 @@ func TestHasHealthChecks(t *testing.T) {
 	assert.True(t, app.HasHealthChecks())
 }
 
-func TestApplicationCheckTCP(t *testing.T) {
+func TestHasHealthChecks(t *testing.T) {
+	app := NewDockerApplication()
+	assert.False(t, app.HasHealthChecks())
+	app.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80)
+	_, err := app.CheckTCP(80, 10)
+	assert.NoError(t, err)
+	assert.True(t, app.HasHealthChecks())
+}
+
+func TestNewApplicationCheckTCP(t *testing.T) {
 	app := NewDockerApplication()
 	assert.False(t, app.HasHealthChecks())
 	_, err := app.CheckTCP(80, 10)
@@ -314,13 +348,46 @@ func TestApplicationCheckTCP(t *testing.T) {
 	assert.Equal(t, 0, *check.PortIndex)
 }
 
-func TestApplicationCheckHTTP(t *testing.T) {
+func TestApplicationCheckTCP(t *testing.T) {
+	app := NewDockerApplication()
+	assert.False(t, app.HasHealthChecks())
+	_, err := app.CheckTCP(80, 10)
+	assert.Error(t, err)
+	assert.False(t, app.HasHealthChecks())
+	app.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80)
+	_, err = app.CheckTCP(80, 10)
+	assert.NoError(t, err)
+	assert.True(t, app.HasHealthChecks())
+	check := (*app.HealthChecks)[0]
+	assert.Equal(t, "TCP", check.Protocol)
+	assert.Equal(t, 10, check.IntervalSeconds)
+	assert.Equal(t, 0, *check.PortIndex)
+}
+
+func TestNewApplicationCheckHTTP(t *testing.T) {
 	app := NewDockerApplication()
 	assert.False(t, app.HasHealthChecks())
 	_, err := app.CheckHTTP("/", 80, 10)
 	assert.Error(t, err)
 	assert.False(t, app.HasHealthChecks())
 	app.Container.ExposeContainer(80).Docker.Container("quay.io/gambol99/apache-php:latest")
+	_, err = app.CheckHTTP("/health", 80, 10)
+	assert.NoError(t, err)
+	assert.True(t, app.HasHealthChecks())
+	check := (*app.HealthChecks)[0]
+	assert.Equal(t, "HTTP", check.Protocol)
+	assert.Equal(t, 10, check.IntervalSeconds)
+	assert.Equal(t, "/health", *check.Path)
+	assert.Equal(t, 0, *check.PortIndex)
+}
+
+func TestApplicationCheckHTTP(t *testing.T) {
+	app := NewDockerApplication()
+	assert.False(t, app.HasHealthChecks())
+	_, err := app.CheckHTTP("/", 80, 10)
+	assert.Error(t, err)
+	assert.False(t, app.HasHealthChecks())
+	app.Container.Docker.Container("quay.io/gambol99/apache-php:latest").Expose(80)
 	_, err = app.CheckHTTP("/health", 80, 10)
 	assert.NoError(t, err)
 	assert.True(t, app.HasHealthChecks())
