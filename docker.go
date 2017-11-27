@@ -413,7 +413,7 @@ func (container *Container) ServicePortIndex(port int) (int, error) {
 	}
 
 	// step: we didn't find the port in the mappings
-	return 0, fmt.Errorf("The container port required was not found in the container port mappings")
+	return 0, fmt.Errorf("The container port %d was not found in the container port mappings", port)
 }
 
 // ServicePortIndex finds the service port index of the exposed port
@@ -431,7 +431,7 @@ func (docker *Docker) ServicePortIndex(port int) (int, error) {
 	}
 
 	// step: we didn't find the port in the mappings
-	return 0, fmt.Errorf("The docker port required was not found in the container port mappings")
+	return 0, fmt.Errorf("The docker port %d was not found in the container port mappings", port)
 }
 
 // AddNetwork adds a network name to a PortMapping
