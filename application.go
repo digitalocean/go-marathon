@@ -503,7 +503,7 @@ func (r *Application) CheckHTTP(path string, port, interval int) (*Application, 
 	// step: get the port index
 	portIndex, err := r.Container.Docker.ServicePortIndex(port)
 	if err != nil {
-		portIndex, err = r.Container.ContainerServicePortIndex(port)
+		portIndex, err = r.Container.ServicePortIndex(port)
 		if err != nil {
 			return nil, err
 		}
@@ -529,7 +529,7 @@ func (r *Application) CheckTCP(port, interval int) (*Application, error) {
 	// step: get the port index
 	portIndex, err := r.Container.Docker.ServicePortIndex(port)
 	if err != nil {
-		portIndex, err = r.Container.ContainerServicePortIndex(port)
+		portIndex, err = r.Container.ServicePortIndex(port)
 		if err != nil {
 			return nil, err
 		}
