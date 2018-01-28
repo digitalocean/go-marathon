@@ -55,11 +55,15 @@ type Volume struct {
 	Persistent    *PersistentVolume `json:"persistent,omitempty"`
 }
 
+// PersistentVolumeType is the a persistent docker volume to be mounted
 type PersistentVolumeType string
 
 const (
-	PersistentVolumeTypeRoot  PersistentVolumeType = "root"
-	PersistentVolumeTypePath  PersistentVolumeType = "path"
+	// PersistentVolumeTypeRoot is the root path of the persistent volume
+	PersistentVolumeTypeRoot PersistentVolumeType = "root"
+	// PersistentVolumeTypePath is the mount path of the persistent volume
+	PersistentVolumeTypePath PersistentVolumeType = "path"
+	// PersistentVolumeTypeMount is the mount type of the persistent volume
 	PersistentVolumeTypeMount PersistentVolumeType = "mount"
 )
 

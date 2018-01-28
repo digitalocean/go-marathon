@@ -43,11 +43,16 @@ func TestApplicationMemory(t *testing.T) {
 }
 
 func TestApplicationString(t *testing.T) {
-	tests := []struct {
+	type test struct {
+		name                string
 		app                 *Application
 		expectedAppJSONPath string
-	}{
+		setup               func(*Application)
+	}
+
+	tests := []test{
 		{
+			name: "marathon < 1.5",
 			app: NewDockerApplication().
 				Name("my-app").
 				CPU(0.1).
@@ -58,8 +63,16 @@ func TestApplicationString(t *testing.T) {
 				AddEnv("NAME", "frontend_http").
 				AddEnv("SERVICE_80_NAME", "test_http"),
 			expectedAppJSONPath: "tests/app-definitions/TestApplicationString-output.json",
+			setup: func(app *Application) {
+				app.
+					Container.Docker.Container("quay.io/gambol99/apache-php:latest").
+					Bridged().
+					Expose(80).
+					Expose(443)
+			},
 		},
 		{
+			name: "marathon > 1.5",
 			app: NewDockerApplication().
 				Name("my-app").
 				CPU(0.1).
@@ -71,31 +84,27 @@ func TestApplicationString(t *testing.T) {
 				AddEnv("NAME", "frontend_http").
 				AddEnv("SERVICE_80_NAME", "test_http"),
 			expectedAppJSONPath: "tests/app-definitions/TestApplicationString-1.5-output.json",
+			setup: func(app *Application) {
+				app.
+					Container.Expose(80).Expose(443).
+					Docker.Container("quay.io/gambol99/apache-php:latest")
+			},
 		},
 	}
 
-	// Marathon < 1.5
-	tests[0].app.
-		Container.Docker.Container("quay.io/gambol99/apache-php:latest").
-		Bridged().
-		Expose(80).
-		Expose(443)
+	for _, test := range tests {
+		label := fmt.Sprintf("test: %s", test.name)
 
-	// Marathon >= 1.5
-	tests[1].app.
-		Container.Expose(80).Expose(443).
-		Docker.Container("quay.io/gambol99/apache-php:latest")
-
-	for i := range tests {
-		_, err := tests[i].app.CheckHTTP("/health", 80, 5)
+		test.setup(test.app)
+		_, err := test.app.CheckHTTP("/health", 80, 5)
 		assert.Nil(t, err)
 
-		expectedAppJSONBytes, err := ioutil.ReadFile(tests[i].expectedAppJSONPath)
+		expectedAppJSONBytes, err := ioutil.ReadFile(test.expectedAppJSONPath)
 		if err != nil {
 			panic(err)
 		}
 		expectedAppJSON := strings.TrimSpace(string(expectedAppJSONBytes))
-		assert.Equal(t, expectedAppJSON, tests[i].app.String())
+		assert.Equal(t, expectedAppJSON, test.app.String(), label)
 	}
 }
 func TestApplicationCount(t *testing.T) {
@@ -789,12 +798,14 @@ func TestIPAddressPerTask(t *testing.T) {
 	ipPerTask.
 		AddGroup("label").
 		AddLabel("key", "value").
-		SetDiscovery(Discovery{})
+		SetDiscovery(Discovery{
+			Ports: &[]Port{},
+		})
 
 	assert.Equal(t, 1, len(*ipPerTask.Groups))
 	assert.Equal(t, "label", (*ipPerTask.Groups)[0])
 	assert.Equal(t, "value", (*ipPerTask.Labels)["key"])
-	assert.NotEmpty(t, ipPerTask.Discovery)
+	assert.NotEmpty(t, *ipPerTask.Discovery)
 
 	ipPerTask.EmptyGroups()
 	assert.Equal(t, 0, len(*ipPerTask.Groups))
