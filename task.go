@@ -220,7 +220,7 @@ func (r *Task) allHealthChecksAlive() bool {
 	}
 	// step: check the health results then
 	for _, check := range r.HealthCheckResults {
-		if check.Alive == false {
+		if !check.Alive {
 			return false
 		}
 	}
